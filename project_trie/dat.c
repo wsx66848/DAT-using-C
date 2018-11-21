@@ -172,8 +172,28 @@ int generateDAT(TrieNode* root, int** base, int** check, STATE** last, int base_
 }
 
 int search(FILE* fin, int *base,int *check, char** output, int* count) {
-        while(!feof(fin)) {
-            char* str = (char*)calloc(50, sizeof(char));
+	    char ch = fgetc(fin);
+	    char* str = (char*)calloc(50, sizeof(char));
+	    STATE index = 1;
+        while(EOF != ch) {
+        	if(isCharEmpty(ch)) {
+        		ch = fgetc(fin);
+        		continue;
+			}
+        	char temp[3];
+        	if(ch > 0) {
+        		temp[0] = ch;
+        		temp[1] = '\0';
+			} else if(ch < 0){
+				temp[0] = ch;
+				do {
+					ch = fgetc(fin);
+				}while(isCharEmpty(ch));
+				temp[1] = ch;
+				temp[2] = '\0';
+			}
+			/*
+            char* str = (char*)calloc(500, sizeof(char));
             fscanf(fin,"%s", str);
             char* ori_str = str;
             STATE index = 1;
@@ -187,6 +207,7 @@ int search(FILE* fin, int *base,int *check, char** output, int* count) {
                     temp[1] = *(++str);
                     temp[2] = '\0';
                 }
+                */
                 STATE begin;
                 if(base[index] < 0) {
                     begin = base[index] * -1;
@@ -194,17 +215,42 @@ int search(FILE* fin, int *base,int *check, char** output, int* count) {
                     begin = base[index];
                 }
                 STATE sub =  begin + code(temp);
+                if(check[sub] != index) {
+                	free(str);
+                	str = (char*)calloc(50, sizeof(char));
+                	index = 1;
+                	while(! isCharEmpty(ch = fgetc(fin)));
+                	continue;
+				}
+				index = sub;
+				strcat(str, temp);
+				if(isCharEmpty(ch = fgetc(fin))) {
+					if(base[index] >= 0) {
+						free(str);
+					} else {
+						//printf("str: %s\n", str);
+						output[index] = str;
+						count[index]++;
+					}
+					str = (char*)calloc(50, sizeof(char));
+                	index = 1;
+				}
+				/*
                 if(check[sub] != index) break;
                 index = sub;
                 if(!*(++str)) {
                    if(base[index] >= 0) break;
                    else {
-                       STATE stat = base[index] > 0 ? base[index] : base[index] * -1;
-                       output[stat] = ori_str;
-                       count[stat]++;
+                       //STATE stat = base[index] > 0 ? base[index] : base[index] * -1;
+                       //output[stat] = ori_str;
+                       output[index] = ori_str;
+                       count[index]++;
+                       //printf("str:%s\n", ori_str);
+                       //count[stat]++;
                    }
                 }
             }
+            */
         }
 }
 
@@ -239,6 +285,11 @@ inline STATE code(const char* c) {//字符c的状态编码 ，字符串的状态
 	if(c[0] > 0) return c[0];
 	if(c[0] < 0) return (unsigned char)c[0]*256+(unsigned char)c[1];//c[0],���ֽڣ�c[1],���ֽ� 
     //gbk2312
+}
+
+inline int isCharEmpty(char c) {
+	if(c == '\n' || c == '\r' || c == ' ' || c == '\t' || c == EOF) return TRUE;
+	return FALSE;
 }
 
 void destroyTrie(TrieNode* root) {

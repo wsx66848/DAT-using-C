@@ -1,5 +1,6 @@
 #include "dat.h"
 #include <locale.h>
+#include <time.h>
 
 #define CSET_GBK    "GB2312"
 #define LC_NAME_zh_CN   "Chinese_People's Republic of China"
@@ -7,7 +8,10 @@
 
 extern int nodeNum;
 
+void printTime();
+
 int main(int argc, char** argv) {
+    printTime();
 	printf("%d\n",setlocale(LC_ALL, LC_NAME_zh_CN_GBK));
 	TrieNode* root = (TrieNode*) malloc(sizeof(TrieNode));
 	createRootNode(root);
@@ -21,6 +25,7 @@ int main(int argc, char** argv) {
 	}
 	fclose(fin_pattern);
 	printf("Trie Build\n");
+    printTime();
 	//outputTrie(root);
 	int* base = (int*)calloc(INIT_NUM, sizeof(int));
 	int* check = (int*)calloc(INIT_NUM, sizeof(int));
@@ -28,6 +33,7 @@ int main(int argc, char** argv) {
 	init(base, check);
 	int max_num = generateDAT(root, &base, &check, &last,INIT_NUM,INIT_NUM);
 	printf("DAT Trie Build, max_numΪ:%d\n", max_num);
+    printTime();
 	int* count = (int*)calloc(max_num, sizeof(int));
 	char** output = (char**)calloc(max_num, sizeof(char*));
 	FILE* fin_string = fopen(argv[2],"r");
@@ -38,11 +44,21 @@ int main(int argc, char** argv) {
     //printf("end search, start sort\n");
     //sort(count, output, max_num);
     printf("end search,start output\n");
+    printTime();
 	outputResult(fout, count, output, max_num);
     printf("end output\n");
 	fclose(fin_string);
 	fclose(fout);
+    printTime();
 	
 	//TODO free, destroy tree
 	return 0;
+}
+
+void printTime() {
+    time_t now;
+    struct tm *tm_now;
+    time(&now);
+    tm_now = localtime(&now);
+    printf("now datetime: %d-%d-%d %d:%d:%d\n", tm_now->tm_year+1900, tm_now->tm_mon+1, tm_now->tm_mday, tm_now->tm_hour, tm_now->tm_min, tm_now->tm_sec) ;
 }

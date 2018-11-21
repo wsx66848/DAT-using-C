@@ -30,5 +30,6 @@ int generateDAT(TrieNode* root, int** base, int** check, STATE** last,int base_r
 int search(FILE* fin, int *base, int *check, char** output, int* count);
 void outputResult(FILE* fout, int* count, char** output, int max_num);
 void sort(int* count, char** output, int max_num);
+int isCharEmpty(char c);
 
 #endif
